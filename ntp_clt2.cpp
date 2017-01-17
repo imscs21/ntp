@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string.h>
-#include "ntp.hpp"
+#include "ntp_unix.hpp"
 #include <time.h>
 using namespace std;
 int main(){ 
