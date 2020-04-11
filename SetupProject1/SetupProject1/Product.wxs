@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
+	 xmlns:netfx="http://schemas.microsoft.com/wix/NetFxExtension"
+	 >
+	
+    <Product Id="{F1E26017-B233-4A79-A949-F56397BB169D}" Name="TimeSync App" Language="1033" Version="1.0.0.0" Manufacturer="HsH" UpgradeCode="4eececb8-4dc0-4a22-b489-0857322f3383">
+	
+		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" >
+			
+		</Package>
+        <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+        <MediaTemplate EmbedCab="yes" />
+        <Feature Id="ProductFeature" Title="TimeSync App" Level="1">
+            <ComponentGroupRef Id="ProductComponents" />
+			<ComponentRef Id="RegistryEntries"/>
+			
+        </Feature>
+		<PropertyRef Id="NETFRAMEWORK45"/>
+		<Condition Message="This application requires .NET Framework 4.5. Please install the .NET Framework then run this installer again.">
+			<![CDATA[Installed OR NETFRAMEWORK45]]>
+		</Condition>
+		<UI >
+			<Publish Dialog="WelcomeDlg"
+           Control="Next"
+           Event="NewDialog"
+           Value="InstallDirDlg"
+           Order="5">1</Publish>
+
+			<Publish Dialog="InstallDirDlg"
+					 Control="Back"
+					 Event="NewDialog"
+					 Value="WelcomeDlg"
+					 Order="5">1</Publish>
+		</UI>
+    </Product>
+    <Fragment>
+		
+        <Directory Id="TARGETDIR" Name="SourceDir">
+		<!--	<Directory Id="DesktopFolder" Name="Desktop">
+				<Component Id="DesktopShortcut" Guid="56D77C44-ECF5-4B36-9A9B-E2B4DDAACF9D" KeyPath="yes" Feature="ProductFeature">
+					<Shortcut Id="DesktopShortcut"
+							  Directory="DesktopFolder"
+							  Name="TimeSync"
+								Target="[#TimeSync.exe]"
+							 
+							  />
+					<RemoveFolder Id="DesktopFolder" On="uninstall"/>
+				</Component>
+			</Directory>-->
+            <Directory Id="ProgramFilesFolder">
+                <Directory Id="INSTALLFOLDER" Name="HshTimeSync">
+                </Directory>
+            </Directory>
+        </Directory>
+		<Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER"/>
+		<UIRef Id="WixUI_InstallDir"/>
+    </Fragment>
+
+	<Fragment>
+		<DirectoryRef Id="INSTALLFOLDER">
+
+			<Component Id="RegistryEntries" Guid="58D36F48-4991-4FEE-9E23-2CBBF608CACB">
+				<RegistryKey Root="HKCU"
+							 Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
+					  Action="create">
+					<RegistryValue Action="write" Type="string" Name="HshTimeSync" Value="[INSTALLFOLDER]TimeSync.exe" KeyPath="yes"/>
+				</RegistryKey>
+				<RemoveRegistryValue  Id="RemoveStartup"
+                     Root="HKLM"
+						Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
+								  Name="HshTimeSync"
+									  />
+			</Component>
+		</DirectoryRef>
+	</Fragment>
+    <Fragment>
+        <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+			
+            <!-- TODO: Remove the comments around this Component element and the ComponentRef below in order to add resources to this installer. -->
+            <!-- <Component Id="ProductComponent"> -->
+            <!-- TODO: Insert files, registry keys, and other resources here. -->
+            <!-- </Component> -->
+			<Component Id="TimeSync.exe" Guid="F3E7903E-6E41-4362-AC4A-CD8EECE5FAC5">
+				<File KeyPath="yes"  Id="TimeSync.exe"  Source="..\..\TimeSync\TimeSync\bin\Release\minimum\TimeSync.exe" />
+				<RegistryKey
+					Id="TimeSyncStartupReg"
+					Root="HKLM"
+							 Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
+					  Action="createAndRemoveOnUninstall">
+					<RegistryValue Type="string" Name="HshTimeSync" Value="[INSTALLFOLDER]TimeSync.exe"/>
+				</RegistryKey>
+				<ServiceInstall Id="ServiceInstaller" Name="Service1" Type="ownProcess" Vital="yes" DisplayName="Service1" Description="My Service Description" Start="auto" Account="LocalSystem" ErrorControl="normal" Interactive="no" />
+				<ServiceControl Id="StartService" Name="Service1" Stop="both" Start="install" Remove="uninstall" Wait="yes" />
+			</Component>
+			<Component Id="ntp_servers.db" Guid="15A345D7-1045-4CE6-8381-33CA89EF2BC7">
+				<File KeyPath="yes" Id="ntp_servers.db" Source="..\..\TimeSync\TimeSync\bin\Release\minimum\ntp_servers.db" />
+			</Component>
+			<Component Id="System.Data.SQLite.dll" Guid="42AFED59-C340-4134-81E1-44AED6A439B7">
+			<File Id="System.Data.SQLite.dll" KeyPath="yes" Source="..\..\TimeSync\TimeSync\bin\Release\minimum\System.Data.SQLite.dll" />
+			</Component>
+        </ComponentGroup>
+    </Fragment>
+</Wix>
