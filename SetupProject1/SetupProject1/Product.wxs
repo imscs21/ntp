@@ -3,7 +3,7 @@
 	 xmlns:netfx="http://schemas.microsoft.com/wix/NetFxExtension"
 	 >
 	
-    <Product Id="{F1E26017-B233-4A79-A949-F56397BB169D}" Name="TimeSync App" Language="1033" Version="1.0.0.0" Manufacturer="HsH" UpgradeCode="4eececb8-4dc0-4a22-b489-0857322f3383">
+    <Product Id="{F1E26017-B233-4A79-A949-F56397BB169D}" Name="TimeSync App" Language="1033" Version="1.0.1.0" Manufacturer="HsH" UpgradeCode="4eececb8-4dc0-4a22-b489-0857322f3383">
 	
 		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" >
 			
@@ -36,7 +36,9 @@
     <Fragment>
 		
         <Directory Id="TARGETDIR" Name="SourceDir">
-		<!--	<Directory Id="DesktopFolder" Name="Desktop">
+			<Directory Id="DesktopFolder" SourceName="Desktop" />
+
+			<!--	<Directory Id="DesktopFolder" Name="Desktop">
 				<Component Id="DesktopShortcut" Guid="56D77C44-ECF5-4B36-9A9B-E2B4DDAACF9D" KeyPath="yes" Feature="ProductFeature">
 					<Shortcut Id="DesktopShortcut"
 							  Directory="DesktopFolder"
@@ -58,9 +60,9 @@
 
 	<Fragment>
 		<DirectoryRef Id="INSTALLFOLDER">
-
+			
 			<Component Id="RegistryEntries" Guid="58D36F48-4991-4FEE-9E23-2CBBF608CACB">
-				<RegistryKey Root="HKCU"
+				<RegistryKey Root="HKLM"
 							 Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
 					  Action="create">
 					<RegistryValue Action="write" Type="string" Name="HshTimeSync" Value="[INSTALLFOLDER]TimeSync.exe" KeyPath="yes"/>
@@ -73,6 +75,7 @@
 			</Component>
 		</DirectoryRef>
 	</Fragment>
+	
     <Fragment>
         <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
 			
@@ -81,7 +84,19 @@
             <!-- TODO: Insert files, registry keys, and other resources here. -->
             <!-- </Component> -->
 			<Component Id="TimeSync.exe" Guid="F3E7903E-6E41-4362-AC4A-CD8EECE5FAC5">
-				<File KeyPath="yes"  Id="TimeSync.exe"  Source="..\..\TimeSync\TimeSync\bin\Release\minimum\TimeSync.exe" />
+				<File KeyPath="yes"  Id="TimeSync.exe"  Source="..\..\TimeSync\TimeSync\bin\Release\minimum\TimeSync.exe" >
+					<Shortcut Id="DesktopShortcut"
+                  Directory="DesktopFolder"
+                  Name="TimeSync Controller"
+                  Description="It can control TimeSync app"
+                  WorkingDirectory="INSTALLFOLDER"
+                  Icon="TimeSync.exe"
+                  IconIndex="0"
+                  Advertise="yes" >
+						<Icon Id="TimeSync.exe" SourceFile="..\..\TimeSync\TimeSync\bin\Release\minimum\TimeSync.exe" />
+					</Shortcut>
+				</File>
+				<!--
 				<RegistryKey
 					Id="TimeSyncStartupReg"
 					Root="HKLM"
@@ -89,6 +104,7 @@
 					  Action="createAndRemoveOnUninstall">
 					<RegistryValue Type="string" Name="HshTimeSync" Value="[INSTALLFOLDER]TimeSync.exe"/>
 				</RegistryKey>
+				-->
 				<ServiceInstall Id="ServiceInstaller" Name="Service1" Type="ownProcess" Vital="yes" DisplayName="Service1" Description="My Service Description" Start="auto" Account="LocalSystem" ErrorControl="normal" Interactive="no" />
 				<ServiceControl Id="StartService" Name="Service1" Stop="both" Start="install" Remove="uninstall" Wait="yes" />
 			</Component>

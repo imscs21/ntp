@@ -96,6 +96,7 @@ namespace TimeSync
         private void init()
         {
             //String strconn = @"Data Source=C:\Users\HSH\source\repos\TimeSync\TimeSync\bin\Debug\ntp_servers.db";
+            this.CanHandlePowerEvent = true;
             tsu = TimeStampUtil.getInstance();
             tsru = TimeStampRegistryUtil.getInstance();
             //ntpsm = new NTPServersManager();
@@ -104,8 +105,39 @@ namespace TimeSync
             system_time = new SYSTEMTIME();
             
         }
-        
-        
+        protected override bool OnPowerEvent(System.ServiceProcess.PowerBroadcastStatus powerStatus)
+        {
+            /*if (powerStatus == PowerBroadcastStatus.PowerStatusChange)
+            {
+                GetSystemTime(out system_time);
+                ulong current_system_time = tsu.Convert2TimeStampFromSystemTimeStruct(system_time);
+                tsru.SaveTimeStamp(current_system_time);
+            }
+            else*/
+            switch (powerStatus)
+            {
+                case PowerBroadcastStatus.Suspend:
+                    {
+                        GetSystemTime(out system_time);
+                        ulong current_system_time = tsu.Convert2TimeStampFromSystemTimeStruct(system_time);
+                        tsru.SaveTimeStamp(current_system_time);
+                        
+                        break;
+                    }
+                case PowerBroadcastStatus.ResumeAutomatic:
+                case PowerBroadcastStatus.ResumeCritical:
+                case PowerBroadcastStatus.ResumeSuspend:
+                    {
+                        ApplyTimeStamp(true);
+                        break;
+                    }
+                default: break;
+            }
+            
+            
+            return base.OnPowerEvent(powerStatus);
+        }
+
         public Service1()
         {
             InitializeComponent();
